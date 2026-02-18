@@ -18,7 +18,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
         
-        /* THEME COCON (Vert/Or/Crème) */
+        /* THEME COCON */
         :root { --primary: #8FA895; --dark: #3A4D3F; --gold: #C5A065; --bg: #FDFBF7; }
         
         body { font-family: 'DM Sans', sans-serif; background-color: var(--bg); color: var(--dark); padding-bottom: 95px; -webkit-tap-highlight-color: transparent; padding-top: env(safe-area-inset-top); }
@@ -27,10 +27,8 @@
         .page { display: none; padding: 20px; animation: fadeIn 0.3s ease-out; }
         .page.active { display: block; }
         
-        /* CARDS */
         .card { background: white; border-radius: 18px; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 12px; border: 1px solid rgba(0,0,0,0.02); }
         
-        /* NAVIGATION */
         .nav-bar { 
             position: fixed; bottom: 0; left: 0; right: 0; 
             background: white; height: 85px; 
@@ -41,25 +39,20 @@
         .nav-btn span { font-size: 9px; font-weight: 700; uppercase; letter-spacing: 0.5px; }
         .nav-btn.active { color: var(--primary); transform: translateY(-3px); }
 
-        /* INPUTS & UTILS */
         .input-style { width: 100%; background: #F8F8F8; border: 1px solid #EEE; border-radius: 12px; padding: 12px; outline: none; margin-bottom: 8px; font-size: 13px; font-weight: 500; color: #555; }
         .btn-gold { background: var(--gold); color: white; width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 11px; box-shadow: 0 4px 12px rgba(197, 160, 101, 0.3); }
         
-        /* TABS */
         .tab-btn { flex: 1; padding: 8px 4px; border-radius: 10px; font-size: 10px; font-weight: 700; transition: 0.3s; text-align: center; white-space: nowrap; }
         .tab-btn.active { background: var(--primary); color: white; shadow: md; }
         .tab-btn.inactive { background: transparent; color: #AAA; }
 
-        /* FILTRES RECETTES */
         .filter-chip { padding: 6px 12px; border-radius: 20px; font-size: 10px; font-bold; border: 1px solid #EEE; background: white; color: #999; transition: 0.2s; white-space: nowrap; }
         .filter-chip.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
 
-        /* CALENDRIER */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px; }
         .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 11px; font-weight: bold; background: #EEE; color: #BBB; cursor: pointer; }
         .cal-day.fasted { background: var(--gold); color: white; box-shadow: 0 2px 8px rgba(197, 160, 101, 0.4); }
 
-        /* TASBIH DESIGN */
         .tasbih-circle {
             width: 140px; height: 140px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #FDFBF7, #EEE);
@@ -105,20 +98,31 @@
         </div>
 
         <div class="card bg-[#FFFDF5] border border-yellow-50">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h3 class="font-bold text-sm text-[#3A4D3F] uppercase tracking-wide">📖 Lecture Coran</h3>
-                    <p class="text-[10px] text-[#C5A065] font-bold mt-1">Marque-page</p>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="upQuran(-1)" class="w-8 h-8 rounded-full bg-white shadow text-[#3A4D3F] font-bold text-lg">-</button>
-                    <div class="text-center w-12">
-                        <span id="quran-page" class="text-2xl font-black block leading-none text-[#3A4D3F]">0</span>
-                        <span class="text-[8px] uppercase font-bold text-gray-400">Page</span>
-                    </div>
-                    <button onclick="upQuran(1)" class="w-8 h-8 rounded-full bg-[#3A4D3F] text-white shadow font-bold text-lg">+</button>
-                </div>
+            <h3 class="font-bold text-sm text-[#3A4D3F] uppercase tracking-wide mb-3">📖 Journal de Lecture</h3>
+            
+            <div class="flex gap-2 mb-2">
+                <input list="surah-list" id="q-surah" placeholder="Sourate (ex: Al-Mulk)" class="input-style bg-white w-2/3 mb-0">
+                <datalist id="surah-list">
+                    <option value="Al-Fatiha">
+                    <option value="Al-Baqarah">
+                    <option value="Al-Kahf">
+                    <option value="Yasin">
+                    <option value="Al-Waqi'a">
+                    <option value="Al-Mulk">
+                    <option value="Al-Ikhlas">
+                    <option value="Al-Falaq">
+                    <option value="An-Nas">
+                </datalist>
             </div>
+            <div class="flex gap-2 items-center mb-3">
+                <input type="number" id="q-start" placeholder="Verset début" class="input-style bg-white text-center mb-0">
+                <span class="text-xs font-bold text-gray-400">à</span>
+                <input type="number" id="q-end" placeholder="Verset fin" class="input-style bg-white text-center mb-0">
+            </div>
+            <button onclick="addQuranLog()" class="btn-gold text-xs py-2 bg-[#3A4D3F] mb-4">Enregistrer la lecture</button>
+
+            <div id="quran-history" class="space-y-2 max-h-40 overflow-y-auto border-t border-gray-100 pt-2">
+                </div>
         </div>
 
         <div class="card">
@@ -296,9 +300,32 @@
             window.resetTasbih = () => { if(confirm('Remise à zéro ?')) { tasbihC=0; db.collection('v3_stats').doc('tasbih').set({c: 0}); } };
             db.collection('v3_stats').doc('tasbih').onSnapshot(d => { if(d.exists) { tasbihC = d.data().c; document.getElementById('tasbih-count').innerText = tasbihC; } });
 
-            // Coran
-            window.upQuran = (v) => { const el = document.getElementById('quran-page'); let val = parseInt(el.innerText) + v; if(val < 0) val = 0; db.collection('v3_stats').doc('quran').set({p: val}); };
-            db.collection('v3_stats').doc('quran').onSnapshot(d => { if(d.exists) document.getElementById('quran-page').innerText = d.data().p; });
+            // Coran (NOUVEAU: LOGGING)
+            window.addQuranLog = () => {
+                const s = document.getElementById('q-surah').value;
+                const v1 = document.getElementById('q-start').value;
+                const v2 = document.getElementById('q-end').value;
+                if(s && v1) {
+                    db.collection('v3_quran_logs').add({s, v1, v2, d: Date.now()});
+                    document.getElementById('q-surah').value = ''; document.getElementById('q-start').value = ''; document.getElementById('q-end').value = '';
+                }
+            };
+            db.collection('v3_quran_logs').orderBy('d', 'desc').limit(20).onSnapshot(s => {
+                const l = document.getElementById('quran-history'); l.innerHTML = '';
+                s.forEach(d => {
+                    const r = d.data();
+                    const date = new Date(r.d).toLocaleDateString('fr-FR', {day:'numeric', month:'short'});
+                    l.innerHTML += `
+                    <div class="flex justify-between items-center text-xs py-2 border-b border-dashed border-gray-100 last:border-0">
+                        <div>
+                            <span class="text-[9px] font-bold text-gray-300 mr-2">${date}</span>
+                            <span class="font-bold text-[#3A4D3F]">${r.s}</span> 
+                            <span class="text-gray-500 italic ml-1">(V. ${r.v1} ${r.v2 ? 'à '+r.v2 : ''})</span>
+                        </div>
+                        <button onclick="del('v3_quran_logs','${d.id}')" class="text-red-200 hover:text-red-400">×</button>
+                    </div>`;
+                });
+            });
 
             // Jeûne
             const calGrid = document.getElementById('fast-grid');
