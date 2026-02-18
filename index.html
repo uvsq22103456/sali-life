@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Mon Univers</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/96/quran.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
+        
+        :root { --primary: #7FA99B; --sec: #394A51; --gold: #D4AF37; --bg: #F9F7F2; }
+        
+        body { font-family: 'DM Sans', sans-serif; background-color: var(--bg); color: var(--sec); padding-bottom: 90px; -webkit-tap-highlight-color: transparent; padding-top: env(safe-area-inset-top); }
+        h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
+
+        .page { display: none; padding: 20px; animation: fadeIn 0.4s ease-out; }
+        .page.active { display: block; }
+        
+        .card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 2px 15px rgba(0,0,0,0.03); margin-bottom: 12px; border: 1px solid rgba(0,0,0,0.02); }
+        
+        /* NAVIGATION */
+        .nav-bar { 
+            position: fixed; bottom: 0; left: 0; right: 0; 
+            background: white; height: 80px; 
+            display: flex; justify-content: space-around; align-items: flex-start; padding-top: 15px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.03); z-index: 999; border-top-left-radius: 25px; border-top-right-radius: 25px;
+        }
+        .nav-btn { color: #C4C4C4; font-size: 20px; display: flex; flex-direction: column; items-center; gap: 4px; transition: 0.2s; }
+        .nav-btn span { font-size: 9px; font-weight: 700; uppercase; letter-spacing: 0.5px; }
+        .nav-btn.active { color: var(--primary); transform: translateY(-3px); }
+
+        /* INPUTS & BTNS */
+        .input-style { width: 100%; background: #F4F4F4; border: none; border-radius: 10px; padding: 12px; outline: none; margin-bottom: 8px; font-size: 13px; }
+        .btn-gold { background: var(--primary); color: white; width: 100%; padding: 12px; border-radius: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 11px; box-shadow: 0 4px 10px rgba(127, 169, 155, 0.3); }
+
+        /* CALENDRIER JEUNE */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
+        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; font-weight: bold; background: #EEE; color: #AAA; cursor: pointer; transition: 0.2s; }
+        .cal-day.fasted { background: var(--gold); color: white; box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="px-6 pt-8 flex justify-between items-end mb-2">
+        <div>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Salam Aleykoum</p>
+            <h1 class="text-3xl font-bold text-[#394A51]">Bienvenue 🌿</h1>
+        </div>
+        <div class="w-10 h-10 rounded-full bg-[#7FA99B] text-white flex items-center justify-center font-serif text-xl italic shadow-lg">M</div>
+    </div>
+
+    <div id="food" class="page active">
+        <div class="flex bg-gray-100 p-1 rounded-xl mb-6">
+            <button onclick="switchFood('recettes')" id="btn-recettes" class="flex-1 py-2 rounded-lg text-xs font-bold shadow-sm bg-white text-gray-800 transition">🍳 Mes Recettes</button>
+            <button onclick="switchFood('restos')" id="btn-restos" class="flex-1 py-2 rounded-lg text-xs font-bold text-gray-400 transition">🍽️ Restos</button>
+        </div>
+
+        <div id="view-recettes">
+            <details class="card bg-white border border-[#7FA99B]/30 mb-4">
+                <summary class="font-serif italic font-bold text-[#7FA99B] cursor-pointer outline-none">+ Ajouter une nouvelle recette</summary>
+                <div class="mt-4 space-y-2">
+                    <input type="text" id="r-name" placeholder="Nom du plat..." class="input-style bg-white border border-gray-100">
+                    <div class="flex gap-2">
+                        <select id="r-cat" class="input-style w-1/2 bg-white"><option value="Plat">Plat</option><option value="Dessert">Dessert</option><option value="Bébé">Pour Yusuf</option></select>
+                        <input type="number" id="r-rate" placeholder="Note /5" max="5" class="input-style w-1/2 bg-white text-center">
+                    </div>
+                    <textarea id="r-avis" placeholder="Mon avis, astuces, verdict..." class="input-style h-20 bg-white"></textarea>
+                    <label class="block w-full py-3 text-center border-2 border-dashed border-gray-200 rounded-lg text-xs font-bold text-gray-400 cursor-pointer mb-2 relative overflow-hidden">
+                        <span id="txt-r">📸 Photo du plat</span>
+                        <input type="file" class="hidden" onchange="compress(this, 'recette')">
+                        <div id="v-recette" class="absolute inset-0 bg-cover bg-center hidden"></div>
+                    </label>
+                    <button onclick="addRecette()" class="btn-gold">Enregistrer</button>
+                </div>
+            </details>
+            <div id="list-recettes" class="grid grid-cols-2 gap-3 pb-24"></div>
+        </div>
+
+        <div id="view-restos" class="hidden">
+            <div class="card bg-gray-50 border-none mb-4">
+                <h3 class="font-bold text-sm mb-2">Nouveau Resto</h3>
+                <input type="text" id="res-name" placeholder="Nom du resto" class="input-style bg-white">
+                <textarea id="res-avis" placeholder="On a aimé quoi ? (Service, plats...)" class="input-style h-16 bg-white"></textarea>
+                <button onclick="addResto()" class="btn-gold bg-[#394A51]">Ajouter au carnet</button>
+            </div>
+            <div id="list-restos" class="space-y-3 pb-24"></div>
+        </div>
+    </div>
+
+    <div id="deen" class="page">
+        <h2 class="text-2xl text-[#7FA99B] mb-4 font-serif italic">Ma Spiritualité</h2>
+
+        <div class="card flex justify-between items-center py-4 px-2">
+            <div class="text-center"><div class="text-[9px] font-bold uppercase mb-1 text-gray-400">Fajr</div><input type="checkbox" id="p-fajr" onchange="saveP('fajr')" class="w-5 h-5 accent-[#D4AF37]"></div>
+            <div class="text-center"><div class="text-[9px] font-bold uppercase mb-1 text-gray-400">Dhuhr</div><input type="checkbox" id="p-dhuhr" onchange="saveP('dhuhr')" class="w-5 h-5 accent-[#D4AF37]"></div>
+            <div class="text-center"><div class="text-[9px] font-bold uppercase mb-1 text-gray-400">Asr</div><input type="checkbox" id="p-asr" onchange="saveP('asr')" class="w-5 h-5 accent-[#D4AF37]"></div>
+            <div class="text-center"><div class="text-[9px] font-bold uppercase mb-1 text-gray-400">Maghrib</div><input type="checkbox" id="p-maghrib" onchange="saveP('maghrib')" class="w-5 h-5 accent-[#D4AF37]"></div>
+            <div class="text-center"><div class="text-[9px] font-bold uppercase mb-1 text-gray-400">Isha</div><input type="checkbox" id="p-isha" onchange="saveP('isha')" class="w-5 h-5 accent-[#D4AF37]"></div>
+        </div>
+
+        <div class="card">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold text-sm uppercase tracking-wider text-[#D4AF37]">🤲 Jours Jeûnés</h3>
+                <span id="fast-count" class="bg-[#D4AF37] text-white text-[10px] font-bold px-2 py-1 rounded-md">0 jours</span>
+            </div>
+            <div class="flex justify-between text-xs font-bold text-gray-300 px-1"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+            <div id="fast-grid" class="cal-grid"></div>
+        </div>
+
+        <div class="mt-6">
+            <div class="flex gap-4 mb-3 border-b border-gray-200 pb-2">
+                <button onclick="subDeen('duas')" class="text-sm font-bold text-[#394A51]">🤲 Mes Duas</button>
+                <button onclick="subDeen('versets')" class="text-sm font-bold text-gray-300 hover:text-[#394A51]">📖 Versets</button>
+            </div>
+            
+            <div id="sub-duas">
+                <div class="flex gap-2 mb-3">
+                    <input type="text" id="new-dua" placeholder="Ajouter une invocation..." class="input-style mb-0 bg-white shadow-sm">
+                    <button onclick="addDua()" class="bg-[#7FA99B] text-white w-12 rounded-lg shadow-sm font-bold text-xl">+</button>
+                </div>
+                <div id="list-duas" class="space-y-2 max-h-60 overflow-y-auto"></div>
+            </div>
+
+            <div id="sub-versets" class="hidden">
+                <textarea id="new-verset" placeholder="Un verset qui m'a touché..." class="input-style h-20 bg-white shadow-sm"></textarea>
+                <button onclick="addVerset()" class="w-full bg-[#394A51] text-white text-xs font-bold py-2 rounded-lg mb-4">Enregistrer le verset</button>
+                <div id="list-versets" class="space-y-3 pb-20"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="journal" class="page">
+        <h2 class="text-2xl text-[#7FA99B] mb-4 font-serif italic">Cher Journal...</h2>
+        <div class="card bg-[#FFFDF5] border border-yellow-50">
+            <p class="text-[10px] text-gray-400 font-bold mb-2 uppercase" id="today-date">Aujourd'hui</p>
+            <textarea id="j-txt" class="w-full h-32 bg-transparent outline-none text-sm leading-relaxed text-gray-600 font-serif" placeholder="Comment je me sens aujourd'hui ?..."></textarea>
+            <button onclick="saveJournal()" class="btn-gold mt-2">Enregistrer la page</button>
+        </div>
+        <div id="list-journal" class="space-y-4 pb-24 mt-6"></div>
+    </div>
+
+    <div id="wish" class="page">
+        <h2 class="text-2xl text-[#7FA99B] mb-4 font-serif italic">Ma Wishlist</h2>
+        <div class="card bg-white border-l-4 border-[#D4AF37]">
+            <input type="text" id="w-name" placeholder="Je voudrais..." class="input-style">
+            <input type="text" id="w-link" placeholder="Lien (URL)" class="input-style">
+            <button onclick="addWish()" class="btn-gold bg-[#D4AF37]">Ajouter à ma liste</button>
+        </div>
+        <div id="list-wish" class="grid grid-cols-2 gap-3 pb-24"></div>
+    </div>
+
+    <nav class="nav-bar">
+        <button onclick="nav('food', this)" class="nav-btn active"><i class="fa-solid fa-utensils"></i><span>Food</span></button>
+        <button onclick="nav('deen', this)" class="nav-btn"><i class="fa-solid fa-moon"></i><span>Deen</span></button>
+        <button onclick="nav('journal', this)" class="nav-btn"><i class="fa-solid fa-book"></i><span>Journal</span></button>
+        <button onclick="nav('wish', this)" class="nav-btn"><i class="fa-solid fa-gift"></i><span>Wish</span></button>
+    </nav>
+
+    <script>
+        // CONFIG FIREBASE (Remplacer ci-dessous)
+        const firebaseConfig = {
+            apiKey: "TA_API_KEY_ICI",
+            authDomain: "TON_PROJET.firebaseapp.com",
+            projectId: "TON_PROJET",
+            storageBucket: "TON_PROJET.appspot.com",
+            messagingSenderId: "ID",
+            appId: "ID"
+        };
+        
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+
+            // UTILS
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('today-date').innerText = new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+            
+            window.nav = (p, btn) => {
+                document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+                document.getElementById(p).classList.add('active');
+                document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+                btn.classList.add('active');
+            };
+
+            let tmpImg = '';
+            window.compress = (inp, k) => {
+                const f = inp.files[0]; if(!f) return;
+                const r = new FileReader(); r.readAsDataURL(f);
+                r.onload = (e) => {
+                    const img = new Image(); img.src = e.target.result;
+                    img.onload = () => {
+                        const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+                        const sc = 400 / img.width; c.width = 400; c.height = img.height * sc;
+                        ctx.drawImage(img, 0, 0, c.width, c.height);
+                        tmpImg = c.toDataURL('image/jpeg', 0.6);
+                        document.getElementById('v-'+k).style.backgroundImage = `url(${tmpImg})`;
+                        document.getElementById('v-'+k).classList.remove('hidden');
+                        document.getElementById('txt-r').innerText = "Photo ajoutée !";
+                    }
+                }
+            };
+
+            // 1. FOOD
+            window.switchFood = (t) => {
+                document.getElementById('view-recettes').className = t==='recettes'?'block':'hidden';
+                document.getElementById('view-restos').className = t==='restos'?'block':'hidden';
+                document.getElementById('btn-recettes').className = t==='recettes'?'flex-1 py-2 rounded-lg text-xs font-bold shadow-sm bg-white text-gray-800 transition':'flex-1 py-2 rounded-lg text-xs font-bold text-gray-400 transition';
+                document.getElementById('btn-restos').className = t==='restos'?'flex-1 py-2 rounded-lg text-xs font-bold shadow-sm bg-white text-gray-800 transition':'flex-1 py-2 rounded-lg text-xs font-bold text-gray-400 transition';
+            };
+
+            window.addRecette = () => {
+                const n = document.getElementById('r-name').value;
+                const c = document.getElementById('r-cat').value;
+                const r = document.getElementById('r-rate').value;
+                const a = document.getElementById('r-avis').value;
+                const i = tmpImg || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300";
+                if(n){ db.collection('s_recipes').add({n,c,r,a,i,d:Date.now()}); document.getElementById('r-name').value=''; tmpImg=''; document.getElementById('v-recette').classList.add('hidden'); }
+            };
+            db.collection('s_recipes').orderBy('d','desc').onSnapshot(s=>{
+                const l = document.getElementById('list-recettes'); l.innerHTML='';
+                s.forEach(d=>{ const r=d.data(); 
+                    l.innerHTML+=`<div class="card p-0 overflow-hidden relative"><div class="h-28 bg-cover bg-center" style="background-image:url('${r.i}')"></div><div class="p-3"><div class="flex justify-between items-start mb-1"><span class="text-[9px] uppercase font-bold text-[#7FA99B] bg-green-50 px-2 rounded">${r.c}</span><span class="text-xs text-yellow-500 font-bold">★ ${r.r}</span></div><h4 class="font-bold text-xs mb-1 truncate">${r.n}</h4><p class="text-[10px] text-gray-400 leading-tight italic">"${r.a||'...'}"</p></div><button onclick="del('s_recipes','${d.id}')" class="absolute top-1 right-1 bg-white text-red-300 w-5 h-5 rounded-full flex items-center justify-center text-xs shadow">x</button></div>`;
+                });
+            });
+
+            window.addResto = () => {
+                const n = document.getElementById('res-name').value; const a = document.getElementById('res-avis').value;
+                if(n){ db.collection('s_restos').add({n,a,d:Date.now()}); document.getElementById('res-name').value=''; }
+            };
+            db.collection('s_restos').orderBy('d','desc').onSnapshot(s=>{
+                const l = document.getElementById('list-restos'); l.innerHTML='';
+                s.forEach(d=>{ const r=d.data();
+                    l.innerHTML+=`<div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm relative"><h4 class="font-bold text-sm text-[#394A51]">${r.n}</h4><p class="text-xs text-gray-500 mt-1 italic">${r.a}</p><button onclick="del('s_restos','${d.id}')" class="absolute top-3 right-3 text-gray-200 hover:text-red-300 text-xs">x</button></div>`;
+                });
+            });
+
+            // 2. DEEN
+            const prayers = ['fajr','dhuhr','asr','maghrib','isha'];
+            db.collection('s_prayers').doc(todayStr).onSnapshot(d=>{ if(d.exists) prayers.forEach(p=>{ document.getElementById('p-'+p).checked = d.data()[p] }); });
+            window.saveP = (p) => { db.collection('s_prayers').doc(todayStr).set({[p]:document.getElementById('p-'+p).checked}, {merge:true}); };
+
+            // Calendrier Jeûne
+            const calGrid = document.getElementById('fast-grid');
+            const dt = new Date(); const m = dt.getMonth(); const y = dt.getFullYear(); const daysInM = new Date(y, m+1, 0).getDate();
+            const startD = new Date(y, m, 1).getDay(); const shift = startD===0?6:startD-1;
+            for(let i=0;i<shift;i++) calGrid.innerHTML+='<div></div>';
+            for(let i=1;i<=daysInM;i++){ 
+                const dKey = `${y}-${(m+1).toString().padStart(2,'0')}-${i.toString().padStart(2,'0')}`;
+                calGrid.innerHTML+=`<div id="fd-${dKey}" onclick="toggleFast('${dKey}')" class="cal-day">${i}</div>`;
+            }
+            window.toggleFast = (k) => { 
+                const el = document.getElementById('fd-'+k);
+                const isFasted = el.classList.contains('fasted');
+                if(isFasted) db.collection('s_fasting').doc(k).delete();
+                else db.collection('s_fasting').doc(k).set({v:true});
+            };
+            db.collection('s_fasting').onSnapshot(s=>{
+                document.querySelectorAll('.cal-day').forEach(e=>e.classList.remove('fasted'));
+                let c=0;
+                s.forEach(d=>{ if(document.getElementById('fd-'+d.id)) { document.getElementById('fd-'+d.id).classList.add('fasted'); c++; } });
+                document.getElementById('fast-count').innerText = c + " jours";
+            });
+
+            // Duas & Versets
+            window.subDeen = (t) => {
+                document.getElementById('sub-duas').className = t==='duas'?'block':'hidden';
+                document.getElementById('sub-versets').className = t==='versets'?'block':'hidden';
+            };
+            window.addDua = () => { const t = document.getElementById('new-dua').value; if(t) db.collection('s_duas').add({t}); document.getElementById('new-dua').value=''; };
+            db.collection('s_duas').onSnapshot(s=>{ document.getElementById('list-duas').innerHTML=s.docs.map(d=>`<div class="bg-white p-3 rounded-lg border border-gray-100 text-sm flex justify-between items-center"><span class="italic text-gray-600">"${d.data().t}"</span><button onclick="del('s_duas','${d.id}')" class="text-gray-300">x</button></div>`).join(''); });
+
+            window.addVerset = () => { const t = document.getElementById('new-verset').value; if(t) db.collection('s_versets').add({t}); document.getElementById('new-verset').value=''; };
+            db.collection('s_versets').onSnapshot(s=>{ document.getElementById('list-versets').innerHTML=s.docs.map(d=>`<div class="card bg-[#394A51] text-white p-4 relative"><p class="font-serif italic text-sm leading-relaxed">"${d.data().t}"</p><button onclick="del('s_versets','${d.id}')" class="absolute bottom-2 right-2 text-white/50 text-xs">Supprimer</button></div>`).join(''); });
+
+            // 3. JOURNAL
+            window.saveJournal = () => { const t = document.getElementById('j-txt').value; if(t) db.collection('s_journal').add({t, d:Date.now()}); document.getElementById('j-txt').value=''; alert('Pensée enregistrée 🔒'); };
+            db.collection('s_journal').orderBy('d','desc').onSnapshot(s=>{
+                const l = document.getElementById('list-journal'); l.innerHTML='';
+                s.forEach(d=>{ const date = new Date(d.data().d).toLocaleDateString('fr-FR'); l.innerHTML+=`<details class="bg-white p-3 rounded-xl border border-gray-100 group"><summary class="text-xs font-bold text-gray-400 cursor-pointer list-none flex justify-between"><span>${date}</span><span class="text-[#7FA99B] group-open:rotate-90 transition">➤</span></summary><p class="mt-2 text-sm text-gray-600 font-serif leading-relaxed">${d.data().t}</p><button onclick="del('s_journal','${d.id}')" class="text-[10px] text-red-300 mt-2 underline">Effacer</button></details>`; });
+            });
+
+            // 4. WISHLIST
+            window.addWish = () => { const n = document.getElementById('w-name').value; const l = document.getElementById('w-link').value; if(n) db.collection('s_wish').add({n,l}); document.getElementById('w-name').value=''; };
+            db.collection('s_wish').onSnapshot(s=>{ 
+                document.getElementById('list-wish').innerHTML=s.docs.map(d=>`<div class="bg-white p-3 rounded-xl border border-gray-100 flex flex-col justify-between relative h-24"><h4 class="font-bold text-sm text-[#394A51] leading-tight">${d.data().n}</h4>${d.data().l?`<a href="${d.data().l}" target="_blank" class="text-[10px] text-[#D4AF37] underline font-bold mt-1">Voir le lien</a>`:''}<button onclick="del('s_wish','${d.id}')" class="absolute top-2 right-2 text-gray-200 hover:text-red-300">x</button></div>`).join(''); 
+            });
+
+            window.del = (c,id) => { if(confirm('Supprimer ?')) db.collection(c).doc(id).delete(); };
+
+        } catch(e) { console.error(e); alert("Erreur Config Firebase"); }
+    </script>
+</body>
+</html>
