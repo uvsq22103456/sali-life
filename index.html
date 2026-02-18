@@ -18,6 +18,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
         
+        /* THEME COCON (Vert/Or/Crème) */
         :root { --primary: #8FA895; --dark: #3A4D3F; --gold: #C5A065; --bg: #FDFBF7; }
         
         body { font-family: 'DM Sans', sans-serif; background-color: var(--bg); color: var(--dark); padding-bottom: 95px; -webkit-tap-highlight-color: transparent; padding-top: env(safe-area-inset-top); }
@@ -49,10 +50,26 @@
         .tab-btn.active { background: var(--primary); color: white; shadow: md; }
         .tab-btn.inactive { background: transparent; color: #AAA; }
 
+        /* FILTRES RECETTES */
+        .filter-chip { padding: 6px 12px; border-radius: 20px; font-size: 10px; font-bold; border: 1px solid #EEE; background: white; color: #999; transition: 0.2s; white-space: nowrap; }
+        .filter-chip.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
+
         /* CALENDRIER */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px; }
         .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 11px; font-weight: bold; background: #EEE; color: #BBB; cursor: pointer; }
         .cal-day.fasted { background: var(--gold); color: white; box-shadow: 0 2px 8px rgba(197, 160, 101, 0.4); }
+
+        /* TASBIH DESIGN */
+        .tasbih-circle {
+            width: 140px; height: 140px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #FDFBF7, #EEE);
+            border: 4px solid var(--gold);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            margin: 0 auto;
+            box-shadow: 0 10px 20px rgba(197, 160, 101, 0.2);
+            cursor: pointer; transition: 0.1s;
+        }
+        .tasbih-circle:active { transform: scale(0.95); }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -63,86 +80,11 @@
         <div>
             <h1 class="text-2xl font-bold italic text-[#3A4D3F]">Mon Cocon 🌿</h1>
         </div>
-        <div class="w-9 h-9 rounded-full bg-[#8FA895] text-white flex items-center justify-center font-serif text-lg border-2 border-white shadow-md">S</div>
+        <div class="w-10 h-10 rounded-full bg-[#8FA895] text-white flex items-center justify-center font-serif text-lg border-2 border-white shadow-md">S</div>
     </div>
 
-    <div id="food" class="page active">
-        <div class="flex bg-gray-100 p-1 rounded-xl mb-6 overflow-hidden">
-            <button onclick="switchFood('my-recipes')" id="btn-my" class="tab-btn active">👩‍🍳 Recettes</button>
-            <button onclick="switchFood('social-recipes')" id="btn-soc" class="tab-btn inactive">📱 TikTok</button>
-            <button onclick="switchFood('restos')" id="btn-res" class="tab-btn inactive">🍽️ Restos</button>
-        </div>
-
-        <div id="view-my-recipes">
-            <details class="card bg-white border border-[#8FA895] mb-4 group">
-                <summary class="font-bold text-[#8FA895] cursor-pointer outline-none flex items-center gap-2"><i class="fa-solid fa-plus-circle"></i> Créer une nouvelle recette</summary>
-                <div class="mt-4 space-y-2">
-                    <input type="text" id="r-titre" placeholder="Nom du plat (ex: Lasagnes)" class="input-style">
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase ml-1">Ingrédients</label>
-                    <textarea id="r-ingr" placeholder="- 500g de viande&#10;- 2 Oignons..." class="input-style h-20"></textarea>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase ml-1">Étapes</label>
-                    <textarea id="r-steps" placeholder="1. Couper les oignons&#10;2. Faire revenir..." class="input-style h-24"></textarea>
-                    <label class="block w-full py-3 text-center border-2 border-dashed border-gray-200 rounded-lg text-xs font-bold text-gray-400 cursor-pointer mb-2 relative overflow-hidden bg-gray-50">
-                        <span id="txt-r"><i class="fa-solid fa-camera mr-1"></i> Ajouter photo du résultat</span>
-                        <input type="file" class="hidden" onchange="compress(this, 'recette')">
-                        <div id="v-recette" class="absolute inset-0 bg-cover bg-center hidden"></div>
-                    </label>
-                    <button onclick="addRecette()" class="btn-gold bg-[#8FA895]">Enregistrer</button>
-                </div>
-            </details>
-            <div id="list-recettes" class="space-y-4 pb-24"></div>
-        </div>
-
-        <div id="view-social-recipes" class="hidden">
-            <div class="card bg-gray-50 border-none mb-4">
-                <p class="text-[10px] uppercase font-bold text-gray-400 mb-2">Sauvegarder un lien</p>
-                <div class="flex gap-2">
-                    <input type="text" id="s-link" placeholder="Coller le lien (TikTok, Insta...)" class="input-style mb-0 bg-white">
-                    <button onclick="addSocial()" class="w-12 bg-black text-white rounded-xl shadow-lg"><i class="fa-solid fa-paste"></i></button>
-                </div>
-                <input type="text" id="s-name" placeholder="C'est quoi ? (ex: Pâtes Feta)" class="input-style mt-2 bg-white">
-            </div>
-            <div id="list-social" class="grid grid-cols-2 gap-3 pb-24"></div>
-        </div>
-
-        <div id="view-restos" class="hidden">
-            <div class="card bg-[#FFFDF5] border border-yellow-100 mb-4">
-                <h3 class="font-bold text-sm text-[#C5A065] mb-2 uppercase tracking-wide">📍 Nouveau repérage</h3>
-                <div class="flex gap-2">
-                    <input type="text" id="res-name" placeholder="Nom du resto..." class="input-style mb-0 bg-white w-2/3">
-                    <input type="text" id="res-loc" placeholder="Ville/Quartier" class="input-style mb-0 bg-white w-1/3">
-                </div>
-                <button onclick="addResto()" class="btn-gold mt-2 bg-[#C5A065]">Ajouter à ma liste</button>
-            </div>
-            <div id="list-restos" class="space-y-3 pb-24"></div>
-        </div>
-    </div>
-
-    <div id="wish" class="page">
-        <h2 class="text-xl font-bold text-[#C5A065] mb-4 font-serif italic">Wishlist & Cadeaux</h2>
-        <div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar">
-            <button onclick="setWishTarget('Elle')" id="w-elle" class="px-4 py-2 rounded-full border border-[#C5A065] text-[#C5A065] text-xs font-bold bg-[#C5A065]/10 whitespace-nowrap">👩 Pour Moi</button>
-            <button onclick="setWishTarget('Yusuf')" id="w-yusuf" class="px-4 py-2 rounded-full border border-gray-200 text-gray-400 text-xs font-bold whitespace-nowrap">👶 Yusuf</button>
-            <button onclick="setWishTarget('Iyad')" id="w-iyad" class="px-4 py-2 rounded-full border border-gray-200 text-gray-400 text-xs font-bold whitespace-nowrap">👨 Iyad</button>
-        </div>
-        <div class="card border-l-4 border-[#C5A065]">
-            <div class="flex gap-2 mb-0">
-                <input type="text" id="w-name" placeholder="Objet..." class="input-style w-2/3">
-                <input type="text" id="w-price" placeholder="Prix €" class="input-style w-1/3 text-center">
-            </div>
-            <input type="text" id="w-url" placeholder="Lien (Optionnel)" class="input-style">
-            <label class="block w-full py-2 text-center border border-dashed border-gray-300 rounded-lg text-[10px] font-bold text-gray-400 cursor-pointer mb-2 relative overflow-hidden bg-gray-50">
-                <span id="txt-w"><i class="fa-regular fa-image mr-1"></i> Ajouter aperçu</span>
-                <input type="file" class="hidden" onchange="compress(this, 'wish')">
-                <div id="v-wish" class="absolute inset-0 bg-cover bg-center hidden opacity-60"></div>
-            </label>
-            <button onclick="addWish()" class="btn-gold">Ajouter à la liste <span id="w-btn-t">Elle</span></button>
-        </div>
-        <div id="list-wish" class="grid grid-cols-2 gap-3 pb-24"></div>
-    </div>
-
-    <div id="deen" class="page">
-        <h2 class="text-xl text-[#3A4D3F] mb-4 font-serif italic">Ma Spiritualité</h2>
+    <div id="deen" class="page active">
+        
         <div class="card flex justify-between items-center py-4 px-2 bg-[#3A4D3F] text-white">
             <div class="text-center"><div class="text-[9px] font-bold uppercase mb-1 opacity-70">Fajr</div><input type="checkbox" id="p-fajr" onchange="saveP('fajr')" class="w-5 h-5 accent-[#C5A065]"></div>
             <div class="text-center"><div class="text-[9px] font-bold uppercase mb-1 opacity-70">Dhuhr</div><input type="checkbox" id="p-dhuhr" onchange="saveP('dhuhr')" class="w-5 h-5 accent-[#C5A065]"></div>
@@ -150,16 +92,45 @@
             <div class="text-center"><div class="text-[9px] font-bold uppercase mb-1 opacity-70">Maghrib</div><input type="checkbox" id="p-maghrib" onchange="saveP('maghrib')" class="w-5 h-5 accent-[#C5A065]"></div>
             <div class="text-center"><div class="text-[9px] font-bold uppercase mb-1 opacity-70">Isha</div><input type="checkbox" id="p-isha" onchange="saveP('isha')" class="w-5 h-5 accent-[#C5A065]"></div>
         </div>
+
+        <div class="card text-center">
+            <h3 class="font-serif italic font-bold text-[#3A4D3F] text-lg mb-4">Mon Tasbih</h3>
+            <div onclick="clickTasbih()" class="tasbih-circle">
+                <span id="tasbih-count" class="text-5xl font-bold text-[#3A4D3F]">0</span>
+                <span class="text-[9px] uppercase tracking-widest mt-1 text-[#C5A065] font-bold">Dhikr</span>
+            </div>
+            <div class="flex justify-center mt-6">
+                <button onclick="resetTasbih()" class="text-[10px] font-bold text-gray-400 uppercase border border-gray-200 px-3 py-1 rounded-full">Remise à zéro ↺</button>
+            </div>
+        </div>
+
+        <div class="card bg-[#FFFDF5] border border-yellow-50">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-sm text-[#3A4D3F] uppercase tracking-wide">📖 Lecture Coran</h3>
+                    <p class="text-[10px] text-[#C5A065] font-bold mt-1">Marque-page</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="upQuran(-1)" class="w-8 h-8 rounded-full bg-white shadow text-[#3A4D3F] font-bold text-lg">-</button>
+                    <div class="text-center w-12">
+                        <span id="quran-page" class="text-2xl font-black block leading-none text-[#3A4D3F]">0</span>
+                        <span class="text-[8px] uppercase font-bold text-gray-400">Page</span>
+                    </div>
+                    <button onclick="upQuran(1)" class="w-8 h-8 rounded-full bg-[#3A4D3F] text-white shadow font-bold text-lg">+</button>
+                </div>
+            </div>
+        </div>
+
         <div class="card">
             <div class="flex justify-between items-center mb-2">
                 <h3 class="font-bold text-sm uppercase tracking-wider text-[#C5A065]">🌙 Jours Jeûnés</h3>
                 <span id="fast-count" class="bg-[#C5A065] text-white text-[10px] font-bold px-2 py-1 rounded-md">0</span>
             </div>
-            <div class="flex justify-between text-[10px] font-bold text-gray-300 px-2 mb-1"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
             <div id="fast-grid" class="cal-grid"></div>
         </div>
-        <div class="card bg-[#F4F1EA] border-none">
-            <h3 class="font-bold text-sm mb-2 text-[#3A4D3F]">🤲 Mes Invocations</h3>
+
+        <div class="card border-none bg-gray-50">
+            <h3 class="font-bold text-sm mb-2 text-[#3A4D3F]">🤲🏾 Mes Invocations</h3>
             <div class="flex gap-2 mb-3">
                 <input type="text" id="new-dua" placeholder="Nouvelle Doua..." class="input-style mb-0 bg-white shadow-sm">
                 <button onclick="addDua()" class="bg-[#3A4D3F] text-white w-10 rounded-lg shadow-sm font-bold text-lg">+</button>
@@ -168,25 +139,110 @@
         </div>
     </div>
 
+    <div id="food" class="page">
+        <div class="flex bg-gray-100 p-1 rounded-xl mb-6 overflow-hidden">
+            <button onclick="switchFood('my-recipes')" id="btn-my" class="tab-btn active">👩🏾‍🍳 Recettes</button>
+            <button onclick="switchFood('social-recipes')" id="btn-soc" class="tab-btn inactive">📱 TikTok</button>
+            <button onclick="switchFood('restos')" id="btn-res" class="tab-btn inactive">🍽️ Restos</button>
+        </div>
+
+        <div id="view-my-recipes">
+            <details class="card bg-white border border-[#8FA895] mb-4 group">
+                <summary class="font-bold text-[#8FA895] cursor-pointer outline-none flex items-center gap-2"><i class="fa-solid fa-plus-circle"></i> Créer une nouvelle recette</summary>
+                <div class="mt-4 space-y-2">
+                    <input type="text" id="r-titre" placeholder="Nom du plat..." class="input-style">
+                    <select id="r-cat" class="input-style">
+                        <option value="Salé">🍝 Salé</option>
+                        <option value="Sucré">🍰 Sucré</option>
+                        <option value="Bébé">👶🏾 Bébé</option>
+                    </select>
+                    <textarea id="r-ingr" placeholder="Ingrédients..." class="input-style h-20"></textarea>
+                    <textarea id="r-steps" placeholder="Étapes..." class="input-style h-24"></textarea>
+                    <label class="block w-full py-3 text-center border-2 border-dashed border-gray-200 rounded-lg text-xs font-bold text-gray-400 cursor-pointer mb-2 relative overflow-hidden bg-gray-50">
+                        <span id="txt-r"><i class="fa-solid fa-camera mr-1"></i> Photo</span>
+                        <input type="file" class="hidden" onchange="compress(this, 'recette')">
+                        <div id="v-recette" class="absolute inset-0 bg-cover bg-center hidden"></div>
+                    </label>
+                    <button onclick="addRecette()" class="btn-gold bg-[#8FA895]">Enregistrer</button>
+                </div>
+            </details>
+
+            <div class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
+                <button onclick="filterRecettes('all')" id="f-all" class="filter-chip active">Tout</button>
+                <button onclick="filterRecettes('Salé')" id="f-Salé" class="filter-chip">🍝 Salé</button>
+                <button onclick="filterRecettes('Sucré')" id="f-Sucré" class="filter-chip">🍰 Sucré</button>
+                <button onclick="filterRecettes('Bébé')" id="f-Bébé" class="filter-chip">👶🏾 Bébé</button>
+            </div>
+
+            <div id="list-recettes" class="space-y-4 pb-24"></div>
+        </div>
+
+        <div id="view-social-recipes" class="hidden">
+            <div class="card bg-gray-50 border-none mb-4">
+                <div class="flex gap-2">
+                    <input type="text" id="s-link" placeholder="Lien TikTok/Insta..." class="input-style mb-0 bg-white">
+                    <button onclick="addSocial()" class="w-12 bg-black text-white rounded-xl shadow-lg"><i class="fa-solid fa-paste"></i></button>
+                </div>
+                <input type="text" id="s-name" placeholder="Titre..." class="input-style mt-2 bg-white">
+            </div>
+            <div id="list-social" class="grid grid-cols-2 gap-3 pb-24"></div>
+        </div>
+
+        <div id="view-restos" class="hidden">
+            <div class="card bg-[#FFFDF5] border border-yellow-100 mb-4">
+                <h3 class="font-bold text-sm text-[#C5A065] mb-2 uppercase">📍 Nouveau repérage</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="res-name" placeholder="Nom..." class="input-style mb-0 bg-white w-2/3">
+                    <input type="text" id="res-loc" placeholder="Ville" class="input-style mb-0 bg-white w-1/3">
+                </div>
+                <button onclick="addResto()" class="btn-gold mt-2 bg-[#C5A065]">Ajouter</button>
+            </div>
+            <div id="list-restos" class="space-y-3 pb-24"></div>
+        </div>
+    </div>
+
+    <div id="wish" class="page">
+        <h2 class="text-xl font-bold text-[#C5A065] mb-4 font-serif italic">Wishlist</h2>
+        <div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar">
+            <button onclick="setWishTarget('Elle')" id="w-elle" class="px-4 py-2 rounded-full border border-[#C5A065] text-[#C5A065] text-xs font-bold bg-[#C5A065]/10 whitespace-nowrap">👩🏾 Pour Moi</button>
+            <button onclick="setWishTarget('Yusuf')" id="w-yusuf" class="px-4 py-2 rounded-full border border-gray-200 text-gray-400 text-xs font-bold whitespace-nowrap">👶🏾 Yusuf</button>
+            <button onclick="setWishTarget('Iyad')" id="w-iyad" class="px-4 py-2 rounded-full border border-gray-200 text-gray-400 text-xs font-bold whitespace-nowrap">👨🏾 Iyad</button>
+        </div>
+        <div class="card border-l-4 border-[#C5A065]">
+            <div class="flex gap-2 mb-0">
+                <input type="text" id="w-name" placeholder="Objet..." class="input-style w-2/3">
+                <input type="text" id="w-price" placeholder="Prix €" class="input-style w-1/3 text-center">
+            </div>
+            <input type="text" id="w-url" placeholder="Lien (Optionnel)" class="input-style">
+            <label class="block w-full py-2 text-center border border-dashed border-gray-300 rounded-lg text-[10px] font-bold text-gray-400 cursor-pointer mb-2 relative overflow-hidden bg-gray-50">
+                <span id="txt-w"><i class="fa-regular fa-image mr-1"></i> Aperçu</span>
+                <input type="file" class="hidden" onchange="compress(this, 'wish')">
+                <div id="v-wish" class="absolute inset-0 bg-cover bg-center hidden opacity-60"></div>
+            </label>
+            <button onclick="addWish()" class="btn-gold">Ajouter <span id="w-btn-t">Elle</span></button>
+        </div>
+        <div id="list-wish" class="grid grid-cols-2 gap-3 pb-24"></div>
+    </div>
+
     <div id="journal" class="page">
         <h2 class="text-xl text-[#3A4D3F] mb-4 font-serif italic">Mon Journal Secret</h2>
         <div class="card bg-[#FFFDF5] border border-yellow-50">
-            <p class="text-[10px] text-gray-400 font-bold mb-2 uppercase" id="today-date">Aujourd'hui</p>
-            <textarea id="j-txt" class="w-full h-32 bg-transparent outline-none text-sm leading-relaxed text-gray-600 font-serif placeholder-gray-300" placeholder="Cher journal, aujourd'hui..."></textarea>
+            <p class="text-[10px] text-gray-400 font-bold mb-2 uppercase" id="today-date">...</p>
+            <textarea id="j-txt" class="w-full h-32 bg-transparent outline-none text-sm leading-relaxed text-gray-600 font-serif placeholder-gray-300" placeholder="Cher journal..."></textarea>
             <button onclick="saveJournal()" class="btn-gold mt-2">Enregistrer</button>
         </div>
         <div id="list-journal" class="space-y-3 pb-24 mt-6"></div>
     </div>
 
     <nav class="nav-bar">
-        <button onclick="nav('food', this)" class="nav-btn active"><i class="fa-solid fa-utensils"></i><span>Cuisine</span></button>
-        <button onclick="nav('wish', this)" class="nav-btn"><i class="fa-solid fa-gift"></i><span>Cadeaux</span></button>
-        <button onclick="nav('deen', this)" class="nav-btn"><i class="fa-solid fa-moon"></i><span>Deen</span></button>
+        <button onclick="nav('deen', this)" class="nav-btn active"><i class="fa-solid fa-moon"></i><span>Deen</span></button>
+        <button onclick="nav('food', this)" class="nav-btn"><i class="fa-solid fa-utensils"></i><span>Food</span></button>
+        <button onclick="nav('wish', this)" class="nav-btn"><i class="fa-solid fa-gift"></i><span>Wish</span></button>
         <button onclick="nav('journal', this)" class="nav-btn"><i class="fa-solid fa-book"></i><span>Journal</span></button>
     </nav>
 
     <script>
-        // CONFIG FIREBASE
+        // CONFIG FIREBASE (Remplacer ci-dessous)
         const firebaseConfig = {
             apiKey: "TA_API_KEY_ICI",
             authDomain: "TON_PROJET.firebaseapp.com",
@@ -200,9 +256,10 @@
             firebase.initializeApp(firebaseConfig);
             const db = firebase.firestore();
 
+            // UTILS
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('today-date').innerText = new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
-
+            
             window.nav = (p, btn) => {
                 document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
                 document.getElementById(p).classList.add('active');
@@ -221,134 +278,87 @@
                         const sc = 400 / img.width; c.width = 400; c.height = img.height * sc;
                         ctx.drawImage(img, 0, 0, c.width, c.height);
                         tmpImg = c.toDataURL('image/jpeg', 0.6);
-                        document.getElementById('v-'+k).style.backgroundImage = `url(${tmpImg})`;
-                        document.getElementById('v-'+k).classList.remove('hidden');
-                        if(k==='wish') document.getElementById('txt-w').innerText = "OK";
-                        else document.getElementById('txt-r').innerText = "OK";
+                        if(k==='wish') document.getElementById('txt-w').innerText="Photo OK";
+                        else document.getElementById('txt-r').innerText="Photo OK";
                     }
                 }
             };
 
-            /* 1. CUISINE (3 TABS) */
-            window.switchFood = (view) => {
-                document.getElementById('view-my-recipes').className = view==='my-recipes'?'block':'hidden';
-                document.getElementById('view-social-recipes').className = view==='social-recipes'?'block':'hidden';
-                document.getElementById('view-restos').className = view==='restos'?'block':'hidden';
-                
-                document.getElementById('btn-my').className = view==='my-recipes'?'tab-btn active':'tab-btn inactive';
-                document.getElementById('btn-soc').className = view==='social-recipes'?'tab-btn active':'tab-btn inactive';
-                document.getElementById('btn-res').className = view==='restos'?'tab-btn active':'tab-btn inactive';
-            };
-
-            // A. Recettes
-            window.addRecette = () => {
-                const n = document.getElementById('r-titre').value;
-                const ingr = document.getElementById('r-ingr').value;
-                const steps = document.getElementById('r-steps').value;
-                const i = tmpImg || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=300";
-                if(n){
-                    db.collection('v2_recipes').add({n, ingr, steps, i, d: Date.now()});
-                    document.getElementById('r-titre').value = ''; document.getElementById('r-ingr').value = ''; 
-                    document.getElementById('r-steps').value = ''; tmpImg = '';
-                    document.getElementById('v-recette').classList.add('hidden');
-                    document.querySelector('details').removeAttribute('open');
-                }
-            };
-            db.collection('v2_recipes').orderBy('d', 'desc').onSnapshot(s => {
-                const l = document.getElementById('list-recettes'); l.innerHTML = '';
-                s.forEach(d => {
-                    const r = d.data();
-                    const ingrHtml = r.ingr ? r.ingr.replace(/\n/g, '<br>') : '';
-                    const stepsHtml = r.steps ? r.steps.replace(/\n/g, '<br>') : '';
-                    l.innerHTML += `<div class="card p-0 overflow-hidden"><div class="h-32 bg-cover bg-center relative" style="background-image:url('${r.i}')"><h3 class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-3 pt-8 font-bold text-lg leading-none">${r.n}</h3></div><details class="group p-3"><summary class="text-xs font-bold text-[#8FA895] cursor-pointer list-none flex justify-between"><span>Voir la recette</span> <span class="group-open:rotate-180 transition">▼</span></summary><div class="mt-3 text-xs text-gray-600"><p class="font-bold uppercase text-[10px] text-[#C5A065] mb-1">Ingrédients</p><p class="mb-3 pl-2 border-l-2 border-gray-100">${ingrHtml}</p><p class="font-bold uppercase text-[10px] text-[#C5A065] mb-1">Préparation</p><p class="pl-2 border-l-2 border-gray-100">${stepsHtml}</p></div><button onclick="del('v2_recipes','${d.id}')" class="w-full mt-3 text-[10px] text-red-300 border border-red-50 rounded py-2">Supprimer recette</button></details></div>`;
-                });
-            });
-
-            // B. Social
-            window.addSocial = () => {
-                const l = document.getElementById('s-link').value; const n = document.getElementById('s-name').value;
-                if(l && n) { db.collection('v2_social').add({l, n, d:Date.now()}); document.getElementById('s-link').value=''; document.getElementById('s-name').value=''; }
-            };
-            db.collection('v2_social').orderBy('d','desc').onSnapshot(s => {
-                const l = document.getElementById('list-social'); l.innerHTML = '';
-                s.forEach(d => {
-                    const r = d.data();
-                    let icon = 'fa-link'; if(r.l.includes('tiktok')) icon = 'fa-tiktok'; if(r.l.includes('instagram')) icon = 'fa-instagram';
-                    l.innerHTML += `<div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-24 relative"><div><i class="fa-brands ${icon} text-xl text-gray-300 mb-1"></i><h4 class="font-bold text-xs text-gray-700 leading-tight line-clamp-2">${r.n}</h4></div><a href="${r.l}" target="_blank" class="text-[10px] font-bold text-white bg-black/80 text-center py-1 rounded-lg mt-1">Ouvrir</a><button onclick="del('v2_social','${d.id}')" class="absolute top-1 right-2 text-gray-200">x</button></div>`;
-                });
-            });
-
-            // C. Restos
-            window.addResto = () => {
-                const n = document.getElementById('res-name').value; const l = document.getElementById('res-loc').value;
-                if(n) { db.collection('v2_restos').add({n, l, v:false, r:0, c:'', d:Date.now()}); document.getElementById('res-name').value=''; document.getElementById('res-loc').value=''; }
-            };
-            window.updResto = (id, data) => db.collection('v2_restos').doc(id).update(data);
-            
-            db.collection('v2_restos').orderBy('d','desc').onSnapshot(s => {
-                const l = document.getElementById('list-restos'); l.innerHTML = '';
-                s.forEach(d => {
-                    const r = d.data();
-                    // Génération des étoiles
-                    const stars = [1,2,3,4,5].map(i => `<span onclick="updResto('${d.id}',{r:${i}})" class="cursor-pointer ${i<=r.r?'text-yellow-400':'text-gray-200'}">★</span>`).join('');
-                    
-                    l.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                        <div class="flex justify-between items-start mb-2">
-                            <div><h4 class="font-bold text-[#3A4D3F]">${r.n}</h4><p class="text-xs text-gray-400 uppercase font-bold tracking-wider"><i class="fa-solid fa-location-dot mr-1"></i>${r.l||'?'}</p></div>
-                            <button onclick="del('v2_restos','${d.id}')" class="text-gray-200 hover:text-red-300">×</button>
-                        </div>
-                        <div class="border-t border-gray-50 pt-2 mt-1">
-                            <label class="flex items-center gap-2 text-xs font-bold text-gray-500 mb-1 cursor-pointer">
-                                <input type="checkbox" ${r.v?'checked':''} onchange="updResto('${d.id}',{v:this.checked})" class="accent-[#C5A065]"> Déjà testé ?
-                            </label>
-                            <div class="${r.v?'block':'hidden'} transition-all duration-300 mt-2 bg-[#FFFDF5] p-2 rounded-lg border border-yellow-50">
-                                <div class="flex gap-1 mb-2 text-lg justify-center">${stars}</div>
-                                <input type="text" value="${r.c||''}" onchange="updResto('${d.id}',{c:this.value})" placeholder="Ton avis ?" class="w-full bg-white p-2 rounded text-xs outline-none border border-gray-100 text-center">
-                            </div>
-                        </div>
-                    </div>`;
-                });
-            });
-
-            /* 2. WISHLIST */
-            let wishTarget = 'Elle';
-            window.setWishTarget = (t) => {
-                wishTarget = t; document.getElementById('w-btn-t').innerText = t;
-                ['Elle','Yusuf','Iyad'].forEach(x => { document.getElementById('w-'+x.toLowerCase()).className = x===t ? "px-4 py-2 rounded-full border border-[#C5A065] text-[#C5A065] text-xs font-bold bg-[#C5A065]/10 whitespace-nowrap shadow-sm" : "px-4 py-2 rounded-full border border-gray-200 text-gray-400 text-xs font-bold whitespace-nowrap"; });
-                renderWishlist();
-            };
-            let allWishes = [];
-            db.collection('v2_wish').onSnapshot(s => { allWishes=[]; s.forEach(d => allWishes.push({id: d.id, ...d.data()})); renderWishlist(); });
-            function renderWishlist() {
-                const l = document.getElementById('list-wish'); l.innerHTML = '';
-                allWishes.filter(w => w.target === wishTarget).forEach(w => {
-                    l.innerHTML += `<div class="card p-2 relative overflow-hidden text-center"><div class="h-24 bg-cover bg-center rounded-lg mb-2" style="background-image:url('${w.i}')"></div><h4 class="font-bold text-xs truncate">${w.n}</h4><p class="text-[#C5A065] font-black text-xs mb-1">${w.p ? w.p+' €' : ''}</p>${w.u ? `<a href="${w.u}" target="_blank" class="text-[9px] underline text-gray-400">Voir lien</a>` : ''}<button onclick="del('v2_wish','${w.id}')" class="absolute top-1 right-1 w-6 h-6 bg-white/80 rounded-full text-red-400 shadow">x</button></div>`;
-                });
-            }
-            window.addWish = () => {
-                const n = document.getElementById('w-name').value; const p = document.getElementById('w-price').value; const u = document.getElementById('w-url').value; const i = tmpImg || "https://via.placeholder.com/150/F0F0F0/AAAAAA?text=Cadeau";
-                if(n) { db.collection('v2_wish').add({n, p, u, i, target: wishTarget}); document.getElementById('w-name').value=''; document.getElementById('w-price').value=''; document.getElementById('w-url').value=''; tmpImg=''; document.getElementById('v-wish').classList.add('hidden'); }
-            };
-
-            /* 3. DEEN */
+            /* 1. DEEN */
+            // Prières
             const prayers = ['fajr','dhuhr','asr','maghrib','isha'];
-            db.collection('v2_prayers').doc(todayStr).onSnapshot(d => { if(d.exists) prayers.forEach(p => { document.getElementById('p-'+p).checked = d.data()[p] }); });
-            window.saveP = (p) => { db.collection('v2_prayers').doc(todayStr).set({[p]:document.getElementById('p-'+p).checked}, {merge:true}); };
+            db.collection('v3_prayers').doc(todayStr).onSnapshot(d => { if(d.exists) prayers.forEach(p => { document.getElementById('p-'+p).checked = d.data()[p] }); });
+            window.saveP = (p) => { db.collection('v3_prayers').doc(todayStr).set({[p]:document.getElementById('p-'+p).checked}, {merge:true}); };
 
+            // Tasbih
+            let tasbihC = 0;
+            window.clickTasbih = () => { tasbihC++; document.getElementById('tasbih-count').innerText = tasbihC; if(navigator.vibrate) navigator.vibrate(5); db.collection('v3_stats').doc('tasbih').set({c: tasbihC}); };
+            window.resetTasbih = () => { if(confirm('Remise à zéro ?')) { tasbihC=0; db.collection('v3_stats').doc('tasbih').set({c: 0}); } };
+            db.collection('v3_stats').doc('tasbih').onSnapshot(d => { if(d.exists) { tasbihC = d.data().c; document.getElementById('tasbih-count').innerText = tasbihC; } });
+
+            // Coran
+            window.upQuran = (v) => { const el = document.getElementById('quran-page'); let val = parseInt(el.innerText) + v; if(val < 0) val = 0; db.collection('v3_stats').doc('quran').set({p: val}); };
+            db.collection('v3_stats').doc('quran').onSnapshot(d => { if(d.exists) document.getElementById('quran-page').innerText = d.data().p; });
+
+            // Jeûne
             const calGrid = document.getElementById('fast-grid');
             const dt = new Date(); const m = dt.getMonth(); const y = dt.getFullYear(); const daysInM = new Date(y, m+1, 0).getDate(); const startD = new Date(y, m, 1).getDay(); const shift = startD===0?6:startD-1;
             calGrid.innerHTML = ''; for(let i=0; i<shift; i++) calGrid.innerHTML += '<div></div>';
             for(let i=1; i<=daysInM; i++){ const dKey = `${y}-${(m+1).toString().padStart(2,'0')}-${i.toString().padStart(2,'0')}`; calGrid.innerHTML += `<div id="fd-${dKey}" onclick="toggleFast('${dKey}')" class="cal-day">${i}</div>`; }
-            window.toggleFast = (k) => { const el = document.getElementById('fd-'+k); if(el.classList.contains('fasted')) db.collection('v2_fasting').doc(k).delete(); else db.collection('v2_fasting').doc(k).set({v:true}); };
-            db.collection('v2_fasting').onSnapshot(s => { document.querySelectorAll('.cal-day').forEach(e => e.classList.remove('fasted')); document.getElementById('fast-count').innerText = s.size; s.forEach(d => { if(document.getElementById('fd-'+d.id)) document.getElementById('fd-'+d.id).classList.add('fasted'); }); });
+            window.toggleFast = (k) => { const el = document.getElementById('fd-'+k); if(el.classList.contains('fasted')) db.collection('v3_fasting').doc(k).delete(); else db.collection('v3_fasting').doc(k).set({v:true}); };
+            db.collection('v3_fasting').onSnapshot(s => { document.querySelectorAll('.cal-day').forEach(e => e.classList.remove('fasted')); document.getElementById('fast-count').innerText = s.size; s.forEach(d => { if(document.getElementById('fd-'+d.id)) document.getElementById('fd-'+d.id).classList.add('fasted'); }); });
 
-            window.addDua = () => { const t = document.getElementById('new-dua').value; if(t) db.collection('v2_duas').add({t}); document.getElementById('new-dua').value=''; };
-            db.collection('v2_duas').onSnapshot(s => { document.getElementById('list-duas').innerHTML = s.docs.map(d => `<div class="bg-white p-3 rounded-xl border border-gray-100 text-sm flex justify-between items-center"><span class="italic text-gray-600 font-serif">"${d.data().t}"</span><button onclick="del('v2_duas','${d.id}')" class="text-gray-300">x</button></div>`).join(''); });
+            // Duas
+            window.addDua = () => { const t = document.getElementById('new-dua').value; if(t) db.collection('v3_duas').add({t}); document.getElementById('new-dua').value=''; };
+            db.collection('v3_duas').onSnapshot(s => { document.getElementById('list-duas').innerHTML = s.docs.map(d => `<div class="bg-white p-3 rounded-xl border border-gray-100 text-sm flex justify-between items-center"><span class="italic text-gray-600 font-serif">"${d.data().t}"</span><button onclick="del('v3_duas','${d.id}')" class="text-gray-300">x</button></div>`).join(''); });
+
+            /* 2. FOOD */
+            window.switchFood = (view) => {
+                document.getElementById('view-my-recipes').className = view==='my-recipes'?'block':'hidden';
+                document.getElementById('view-social-recipes').className = view==='social-recipes'?'block':'hidden';
+                document.getElementById('view-restos').className = view==='restos'?'block':'hidden';
+                document.getElementById('btn-my').className = view==='my-recipes'?'tab-btn active':'tab-btn inactive';
+                document.getElementById('btn-soc').className = view==='social-recipes'?'tab-btn active':'tab-btn inactive';
+                document.getElementById('btn-res').className = view==='restos'?'tab-btn active':'tab-btn inactive';
+            };
+            let currentRecipeFilter = 'all'; let allRecipes = [];
+            window.filterRecettes = (filter) => { 
+                currentRecipeFilter = filter; 
+                document.querySelectorAll('.filter-chip').forEach(btn => { btn.classList.remove('active'); if(btn.id === 'f-'+filter) btn.classList.add('active'); });
+                renderRecipes(); 
+            };
+            function renderRecipes() {
+                const l = document.getElementById('list-recettes'); l.innerHTML = '';
+                const filtered = currentRecipeFilter === 'all' ? allRecipes : allRecipes.filter(r => r.cat === currentRecipeFilter);
+                filtered.forEach(r => {
+                    const ingrHtml = r.ingr ? r.ingr.replace(/\n/g, '<br>') : '';
+                    const stepsHtml = r.steps ? r.steps.replace(/\n/g, '<br>') : '';
+                    const catColors = { 'Salé': 'bg-orange-100 text-orange-600', 'Sucré': 'bg-pink-100 text-pink-600', 'Bébé': 'bg-blue-100 text-blue-600' };
+                    const catBadge = r.cat ? `<span class="absolute top-2 left-2 ${catColors[r.cat]||'bg-gray-100'} text-[9px] font-bold px-2 py-1 rounded-md uppercase z-10 shadow-sm">${r.cat}</span>` : '';
+                    l.innerHTML += `<div class="card p-0 overflow-hidden relative">${catBadge}<div class="h-32 bg-cover bg-center relative" style="background-image:url('${r.i}')"><h3 class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-3 pt-8 font-bold text-lg leading-none">${r.n}</h3></div><details class="group p-3"><summary class="text-xs font-bold text-[#8FA895] cursor-pointer list-none flex justify-between"><span>Voir la recette</span> <span class="group-open:rotate-180 transition">▼</span></summary><div class="mt-3 text-xs text-gray-600"><p class="font-bold uppercase text-[10px] text-[#C5A065] mb-1">Ingrédients</p><p class="mb-3 pl-2 border-l-2 border-gray-100">${ingrHtml}</p><p class="font-bold uppercase text-[10px] text-[#C5A065] mb-1">Préparation</p><p class="pl-2 border-l-2 border-gray-100">${stepsHtml}</p></div><button onclick="del('v3_recipes','${r.id}')" class="w-full mt-3 text-[10px] text-red-300 border border-red-50 rounded py-2">Supprimer recette</button></details></div>`;
+                });
+            }
+            window.addRecette = () => { const n = document.getElementById('r-titre').value; const cat = document.getElementById('r-cat').value; const ingr = document.getElementById('r-ingr').value; const steps = document.getElementById('r-steps').value; const i = tmpImg || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300"; if(n){ db.collection('v3_recipes').add({n, cat, ingr, steps, i, d: Date.now()}); document.getElementById('r-titre').value=''; tmpImg=''; document.querySelector('details').removeAttribute('open'); }};
+            db.collection('v3_recipes').orderBy('d', 'desc').onSnapshot(s => { allRecipes = []; s.forEach(d => allRecipes.push({id: d.id, ...d.data()})); renderRecipes(); });
+
+            window.addSocial = () => { const l = document.getElementById('s-link').value; const n = document.getElementById('s-name').value; if(l && n) { db.collection('v3_social').add({l, n, d:Date.now()}); document.getElementById('s-link').value=''; } };
+            db.collection('v3_social').orderBy('d','desc').onSnapshot(s => { const l = document.getElementById('list-social'); l.innerHTML = ''; s.forEach(d => { const r = d.data(); let icon = 'fa-link'; if(r.l.includes('tiktok')) icon = 'fa-tiktok'; if(r.l.includes('instagram')) icon = 'fa-instagram'; l.innerHTML += `<div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-24 relative"><div><i class="fa-brands ${icon} text-xl text-gray-300 mb-1"></i><h4 class="font-bold text-xs text-gray-700 leading-tight line-clamp-2">${r.n}</h4></div><a href="${r.l}" target="_blank" class="text-[10px] font-bold text-white bg-black/80 text-center py-1 rounded-lg mt-1">Ouvrir</a><button onclick="del('v3_social','${d.id}')" class="absolute top-1 right-2 text-gray-200">x</button></div>`; }); });
+
+            window.addResto = () => { const n = document.getElementById('res-name').value; const l = document.getElementById('res-loc').value; if(n) { db.collection('v3_restos').add({n, l, v:false, r:0, c:'', d:Date.now()}); document.getElementById('res-name').value=''; } };
+            window.updResto = (id, data) => db.collection('v3_restos').doc(id).update(data);
+            db.collection('v3_restos').orderBy('d','desc').onSnapshot(s => { const l = document.getElementById('list-restos'); l.innerHTML = ''; s.forEach(d => { const r = d.data(); const stars = [1,2,3,4,5].map(i => `<span onclick="updResto('${d.id}',{r:${i}})" class="cursor-pointer ${i<=r.r?'text-yellow-400':'text-gray-200'}">★</span>`).join(''); l.innerHTML += `<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm"><div class="flex justify-between items-start mb-2"><div><h4 class="font-bold text-[#3A4D3F]">${r.n}</h4><p class="text-xs text-gray-400 uppercase font-bold tracking-wider"><i class="fa-solid fa-location-dot mr-1"></i>${r.l||'?'}</p></div><button onclick="del('v3_restos','${d.id}')" class="text-gray-200 hover:text-red-300">×</button></div><div class="border-t border-gray-50 pt-2 mt-1"><label class="flex items-center gap-2 text-xs font-bold text-gray-500 mb-1 cursor-pointer"><input type="checkbox" ${r.v?'checked':''} onchange="updResto('${d.id}',{v:this.checked})" class="accent-[#C5A065]"> Déjà testé ?</label><div class="${r.v?'block':'hidden'} transition-all duration-300 mt-2 bg-[#FFFDF5] p-2 rounded-lg border border-yellow-50"><div class="flex gap-1 mb-2 text-lg justify-center">${stars}</div><input type="text" value="${r.c||''}" onchange="updResto('${d.id}',{c:this.value})" placeholder="Ton avis ?" class="w-full bg-white p-2 rounded text-xs outline-none border border-gray-100 text-center"></div></div></div>`; }); });
+
+            /* 3. WISHLIST */
+            let wishTarget = 'Elle';
+            window.setWishTarget = (t) => { wishTarget = t; document.getElementById('w-btn-t').innerText = t; ['Elle','Yusuf','Iyad'].forEach(x => { document.getElementById('w-'+x.toLowerCase()).className = x===t ? "px-4 py-2 rounded-full border border-[#C5A065] text-[#C5A065] text-xs font-bold bg-[#C5A065]/10 whitespace-nowrap shadow-sm" : "px-4 py-2 rounded-full border border-gray-200 text-gray-400 text-xs font-bold whitespace-nowrap"; }); renderWishlist(); };
+            let allWishes = [];
+            db.collection('v3_wish').onSnapshot(s => { allWishes=[]; s.forEach(d => allWishes.push({id: d.id, ...d.data()})); renderWishlist(); });
+            function renderWishlist() { const l = document.getElementById('list-wish'); l.innerHTML = ''; allWishes.filter(w => w.target === wishTarget).forEach(w => { l.innerHTML += `<div class="card p-2 relative overflow-hidden text-center"><div class="h-24 bg-cover bg-center rounded-lg mb-2" style="background-image:url('${w.i}')"></div><h4 class="font-bold text-xs truncate">${w.n}</h4><p class="text-[#C5A065] font-black text-xs mb-1">${w.p ? w.p+' €' : ''}</p>${w.u ? `<a href="${w.u}" target="_blank" class="text-[9px] underline text-gray-400">Voir lien</a>` : ''}<button onclick="del('v3_wish','${w.id}')" class="absolute top-1 right-1 w-6 h-6 bg-white/80 rounded-full text-red-400 shadow">x</button></div>`; }); }
+            window.addWish = () => { const n = document.getElementById('w-name').value; const p = document.getElementById('w-price').value; const u = document.getElementById('w-url').value; const i = tmpImg || "https://via.placeholder.com/150/F0F0F0/AAAAAA?text=Cadeau"; if(n) { db.collection('v3_wish').add({n, p, u, i, target: wishTarget}); document.getElementById('w-name').value=''; tmpImg=''; } };
 
             /* 4. JOURNAL */
-            window.saveJournal = () => { const t = document.getElementById('j-txt').value; if(t) db.collection('v2_journal').add({t, d:Date.now()}); document.getElementById('j-txt').value=''; alert('Pensée enregistrée 🔒'); };
-            db.collection('v2_journal').orderBy('d','desc').onSnapshot(s => { const l = document.getElementById('list-journal'); l.innerHTML = ''; s.forEach(d => { const date = new Date(d.data().d).toLocaleDateString('fr-FR', {day:'numeric', month:'short'}); l.innerHTML += `<div class="bg-white p-4 rounded-2xl border border-gray-50 shadow-sm"><div class="flex justify-between items-center mb-2"><span class="text-[10px] font-black text-gray-300 uppercase tracking-widest">${date}</span><button onclick="del('v2_journal','${d.id}')" class="text-gray-200">×</button></div><p class="text-sm text-gray-600 font-serif leading-relaxed italic">"${d.data().t}"</p></div>`; }); });
+            window.saveJournal = () => { const t = document.getElementById('j-txt').value; if(t) db.collection('v3_journal').add({t, d:Date.now()}); document.getElementById('j-txt').value=''; alert('Pensée enregistrée 🔒'); };
+            db.collection('v3_journal').orderBy('d','desc').onSnapshot(s => { const l = document.getElementById('list-journal'); l.innerHTML = ''; s.forEach(d => { const date = new Date(d.data().d).toLocaleDateString('fr-FR', {day:'numeric', month:'short'}); l.innerHTML += `<div class="bg-white p-4 rounded-2xl border border-gray-50 shadow-sm"><div class="flex justify-between items-center mb-2"><span class="text-[10px] font-black text-gray-300 uppercase tracking-widest">${date}</span><button onclick="del('v3_journal','${d.id}')" class="text-gray-200">×</button></div><p class="text-sm text-gray-600 font-serif leading-relaxed italic">"${d.data().t}"</p></div>`; }); });
 
             window.del = (c,id) => { if(confirm('Supprimer ?')) db.collection(c).doc(id).delete(); };
 
